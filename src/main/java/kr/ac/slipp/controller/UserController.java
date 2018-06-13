@@ -1,5 +1,7 @@
 package kr.ac.slipp.controller;
 
+import javax.servlet.http.HttpSession;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -37,6 +39,32 @@ public class UserController {
 	public String form() {
 		
 		return "/users/form";
+	}
+	
+	@GetMapping("/login")
+	public String login() {
+		
+		return "/users/login";
+	}
+	
+	@PostMapping("/login")
+	public String login(String userId, String password, HttpSession session) {
+		//users.add(user);
+		//userRepository.save(user);
+		// 1. 있는 정보인지?
+		User user = userRepository.findByUserId(userId);  // userId 로 조회되도록 추가해야 함... 우..
+		if( user == null) {
+			return "redirect:/users/login";
+		}
+		
+		// 2. 패스워드 일치하는지?
+		if( !user.getPassword().equals(password) ) {
+			return "redirect:/users/login";
+		}
+		
+		session.setAttribute("user", user);// 세션에 유저정보 저장
+		
+		return "redirect:/";
 	}
 	
 
