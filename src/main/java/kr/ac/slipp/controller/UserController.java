@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 
@@ -62,17 +63,71 @@ public class UserController {
 			return "redirect:/users/login";
 		}
 		
-		session.setAttribute("user", user);// 세션에 유저정보 저장
+		session.setAttribute("sessionedUser", user);// 세션에 유저정보 저장
 		
 		return "redirect:/";
 	}
 	
 	@GetMapping("/logout")
 	public String logout(HttpSession session) {
-		session.removeAttribute("user");
+		session.removeAttribute("sessionedUser");
+		
 
 		return "redirect:/";
 	}
+	
+	@GetMapping("/{id}")
+	public String updateform(@PathVariable Long id, Model model , HttpSession session) {
+		// 로그인 되었다는 것을 꼭 이런식으로 처리해야 하나?
+		Object tempUser = session.getAttribute("sessionedUser");
+		if( tempUser == null ) {
+			return "redirect:/users/login";
+		}
+		
+		User sessionedUser = (User)tempUser;
+		if( !id.equals(sessionedUser.getId())) {
+			throw new IllegalStateException("cannot update others");
+		}
+		
+		User user= userRepository.findOne(sessionedUser.getId());
+		model.addAttribute("user",user);
+
+		return "/users/updateForm";
+	}
+	
+	
+	@PostMapping("/{id}")
+	public String update(@PathVariable Long id, User updatedUser , HttpSession session) {
+		Object tempUser = session.getAttribute("sessionedUser");
+		//System.out.println("here 1");
+		if( tempUser == null ) {
+			return "redirect:/users/login";
+		}
+		System.out.println("here 2");
+		User sessionedUser = (User)tempUser;
+		if( !id.equals(sessionedUser.getId())) {
+			throw new IllegalStateException("cannot update others");
+		}
+		System.out.println("here 3");
+		User user= userRepository.findOne(id);
+		System.out.println("here 4");
+		// update시 id가 동일할 수 있음 
+
+		user.update(updatedUser);
+		System.out.println("here 5");
+		
+		try { // 이부분 엉성함.. sql exception 필요
+			userRepository.save(user);
+		} catch (Exception  e) {
+			throw new IllegalStateException("user id is different.");
+		}
+		
+
+		System.out.println("here 6");
+		return "redirect:/users/"+id;
+	}
+	
+
 	
 
 }
