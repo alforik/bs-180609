@@ -81,7 +81,7 @@ public class UserController {
 	public String updateform(@PathVariable Long id, Model model , HttpSession session) {
 		// 로그인 되었다는 것을 꼭 이런식으로 처리해야 하나?
 		//Object tempUser = session.getAttribute(HttpSessionUtils.USER_SESSION_KEY);
-		if( HttpSessionUtils.isLoginUser(session) ) {
+		if( !HttpSessionUtils.isLoginUser(session) ) {
 			return "redirect:/users/login";
 		}
 		//System.out.println("here 2");
@@ -91,7 +91,8 @@ public class UserController {
 			throw new IllegalStateException("cannot update others");
 		}
 		
-		User user= userRepository.findOne(sessionedUser.getId());
+		//User user= userRepository.findOne(sessionedUser.getId());
+		User user= userRepository.findOne(id);
 		model.addAttribute("user",user);
 
 		return "/users/updateForm";
@@ -100,7 +101,7 @@ public class UserController {
 	@PostMapping("/{id}")
 	public String update(@PathVariable Long id, User updatedUser , HttpSession session) {
 		//Object tempUser = session.getAttribute(HttpSessionUtils.USER_SESSION_KEY);
-		if( HttpSessionUtils.isLoginUser(session) ) {
+		if( !HttpSessionUtils.isLoginUser(session) ) {
 			return "redirect:/users/login";
 		}
 		//System.out.println("here 2");

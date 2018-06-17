@@ -68,4 +68,9 @@ public class Qna {
 	public void setContents(String contents) {
 		this.contents = contents;
 	}
+	
+	public void update(Qna newQna) {
+		this.title = newQna.title;
+		this.contents = newQna.contents;
+	}
 }
