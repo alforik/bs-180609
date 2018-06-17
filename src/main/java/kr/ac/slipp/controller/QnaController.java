@@ -37,9 +37,9 @@ public class QnaController {
 			return "/users/login";
 		}
 		
-		User sessionedUser = HttpSessionUtils.getUserFromSession(session);
+		User sessionUser = HttpSessionUtils.getUserFromSession(session);
 		
-		Qna newQna = new Qna(sessionedUser.getUserId(), title, contents);
+		Qna newQna = new Qna(sessionUser, title, contents);
 		qnaRepository.save(newQna);
 		
 		return "redirect:/";
