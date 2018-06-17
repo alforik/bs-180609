@@ -71,4 +71,19 @@ public class User {
 		this.name = newUser.name;
 		this.email = newUser.email;
 	}
+	
+	public boolean matchPassword(String newPassword) {
+				// null 인지 체크
+		if( newPassword == null ) {
+			return false;
+		}
+		return newPassword.equals(password);
+	}
+	public boolean matchId(Long newId) {
+		// null 인지 체크
+	if( newId == null ) {
+		return false;
+	}
+	return newId.equals(id);
+	}
 }

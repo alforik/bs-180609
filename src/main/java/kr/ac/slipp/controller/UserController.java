@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 
 import kr.ac.slipp.domain.User;
 import kr.ac.slipp.dto.UserRepository;
+import kr.ac.slipp.util.HttpSessionUtils;
 
 @Controller
 @RequestMapping("/users")
@@ -59,18 +60,18 @@ public class UserController {
 		}
 		
 		// 2. 패스워드 일치하는지?
-		if( !user.getPassword().equals(password) ) {
+		if( !user.matchPassword(password) ) {
 			return "redirect:/users/login";
 		}
 		
-		session.setAttribute("sessionedUser", user);// 세션에 유저정보 저장
+		session.setAttribute(HttpSessionUtils.USER_SESSION_KEY, user);// 세션에 유저정보 저장
 		
 		return "redirect:/";
 	}
 	
 	@GetMapping("/logout")
 	public String logout(HttpSession session) {
-		session.removeAttribute("sessionedUser");
+		session.removeAttribute(HttpSessionUtils.USER_SESSION_KEY);
 		
 
 		return "redirect:/";
@@ -79,13 +80,14 @@ public class UserController {
 	@GetMapping("/{id}")
 	public String updateform(@PathVariable Long id, Model model , HttpSession session) {
 		// 로그인 되었다는 것을 꼭 이런식으로 처리해야 하나?
-		Object tempUser = session.getAttribute("sessionedUser");
-		if( tempUser == null ) {
+		//Object tempUser = session.getAttribute(HttpSessionUtils.USER_SESSION_KEY);
+		if( HttpSessionUtils.isLoginUser(session) ) {
 			return "redirect:/users/login";
 		}
-		
-		User sessionedUser = (User)tempUser;
-		if( !id.equals(sessionedUser.getId())) {
+		//System.out.println("here 2");
+		User sessionedUser = HttpSessionUtils.getUserFromSession(session);
+		//if( !id.equals(sessionedUser.getId())  ) {
+		if( !sessionedUser.matchId(id) ) {
 			throw new IllegalStateException("cannot update others");
 		}
 		
@@ -95,17 +97,17 @@ public class UserController {
 		return "/users/updateForm";
 	}
 	
-	
 	@PostMapping("/{id}")
 	public String update(@PathVariable Long id, User updatedUser , HttpSession session) {
-		Object tempUser = session.getAttribute("sessionedUser");
-		//System.out.println("here 1");
-		if( tempUser == null ) {
+		//Object tempUser = session.getAttribute(HttpSessionUtils.USER_SESSION_KEY);
+		if( HttpSessionUtils.isLoginUser(session) ) {
 			return "redirect:/users/login";
 		}
-		System.out.println("here 2");
-		User sessionedUser = (User)tempUser;
-		if( !id.equals(sessionedUser.getId())) {
+		//System.out.println("here 2");
+		User sessionedUser = HttpSessionUtils.getUserFromSession(session);
+		
+		//if( !id.equals(sessionedUser.getId())  ) {
+		if( !sessionedUser.matchId(id) ) {
 			throw new IllegalStateException("cannot update others");
 		}
 		System.out.println("here 3");
