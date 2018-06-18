@@ -5,6 +5,7 @@ import javax.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -70,14 +71,15 @@ public class QnaController {
 		//User user= userRepository.findOne(sessionedUser.getId());
 		//Qna qna= qnaRepository.findOne(id);
 		model.addAttribute("qna",qnaRepository.findOne(id));
+		System.out.println("id: "+id);
 
 		return "/qnas/updateForm";
 	}
-	
+	// put method를 사용함
 	@PostMapping("/{id}")
 	public String update(@PathVariable Long id, Qna updatedQna , HttpSession session) {
 		//Object tempUser = session.getAttribute(HttpSessionUtils.USER_SESSION_KEY);
-		if( HttpSessionUtils.isLoginUser(session) ) {
+		if( !HttpSessionUtils.isLoginUser(session) ) {
 			return "redirect:/users/login";
 		}
 
@@ -93,9 +95,26 @@ public class QnaController {
 		
 
 		//System.out.println("here 6");
-		return "redirect:/qnas/"+id;
+		//return "redirect:/qnas/"+id; // 이방법보다
+		return String.format("reditrect:/qnas/%d", id); // 이방법이 좋음
 	}
 	
+	@DeleteMapping("/{id}")
+	public String delete(@PathVariable Long id, HttpSession session) {
+		//Object tempUser = session.getAttribute(HttpSessionUtils.USER_SESSION_KEY);
+		if( !HttpSessionUtils.isLoginUser(session) ) {
+			return "redirect:/users/login";
+		}
+	
+		try { // 이부분 엉성함.. sql exception 필요
+			qnaRepository.delete(id);
+		} catch (Exception  e) {
+			throw new IllegalStateException("something wrong");
+		}
+		//System.out.println("here 6");
+		//return "redirect:/qnas/"+id; // 이방법보다
+		return "/index"; // 이방법이 좋음
+	}
 
 
 

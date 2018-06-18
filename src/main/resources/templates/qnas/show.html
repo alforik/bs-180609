@@ -1,6 +1,6 @@
 
 {{ > /include/navigation }}
-// <body> 시작태크 있음
+
 
 <div class="container" id="main">
     <div class="col-md-12 col-sm-12 col-lg-12">
@@ -32,7 +32,7 @@
                               <a class="link-modify-article" href="/qnas/{{id}}/updateform">수정</a>
                           </li>
                           <li>
-                              <form class="form-delete" action="/questions/423" method="POST">
+                              <form class="form-delete" action="/qnas/{{id}}" method="POST">
                                   <input type="hidden" name="_method" value="DELETE">
                                   <button class="link-delete-article" type="submit">삭제</button>
                               </form>
@@ -155,4 +155,3 @@
 
 <!-- script references -->
 {{ > /include/footer }}
-// </body> 마침태크 있음
