@@ -18,6 +18,7 @@ import org.springframework.test.web.servlet.MockMvc;
 
 public class UserControllerTest {
 	
+	//@Autowired
 	private MockMvc mockMvc;
 	
 	
