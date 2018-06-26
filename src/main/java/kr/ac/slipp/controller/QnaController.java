@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 import kr.ac.slipp.domain.Qna;
@@ -76,16 +77,19 @@ public class QnaController {
 		return "/qnas/updateForm";
 	}
 	// put method를 사용함
-	@PostMapping("/{id}")
-	public String update(@PathVariable Long id, Qna updatedQna , HttpSession session) {
+	@PutMapping("/{id}")
+	public String update(@PathVariable Long id, String title, String contents , HttpSession session) {
 		//Object tempUser = session.getAttribute(HttpSessionUtils.USER_SESSION_KEY);
 		if( !HttpSessionUtils.isLoginUser(session) ) {
 			return "redirect:/users/login";
 		}
 
+		System.out.println("here 1 id : " + id);
 		Qna qna= qnaRepository.findOne(id);
 
-		qna.update(updatedQna);
+
+		System.out.println("here 2 title : " + title + " contents : " + contents );
+		qna.update(title, contents);
 		
 		try { // 이부분 엉성함.. sql exception 필요
 			qnaRepository.save(qna);
@@ -96,7 +100,7 @@ public class QnaController {
 
 		//System.out.println("here 6");
 		//return "redirect:/qnas/"+id; // 이방법보다
-		return String.format("reditrect:/qnas/%d", id); // 이방법이 좋음
+		return String.format("redirect:/qnas/%d", id); // 이방법이 좋음
 	}
 	
 	@DeleteMapping("/{id}")
@@ -113,7 +117,7 @@ public class QnaController {
 		}
 		//System.out.println("here 6");
 		//return "redirect:/qnas/"+id; // 이방법보다
-		return "/index"; // 이방법이 좋음
+		return "redirect:/"; // 이방법이 좋음
 	}
 
 
