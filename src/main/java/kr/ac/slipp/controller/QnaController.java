@@ -50,13 +50,19 @@ public class QnaController {
 	}
 	@GetMapping("/{id}")
 	public String show(@PathVariable Long id, HttpSession session, Model model) {
-		if( !HttpSessionUtils.isLoginUser(session) ) {
-			
-			return "/users/login";
-		}
+//		if( !HttpSessionUtils.isLoginUser(session) ) {
+//			
+//			return "/users/login";
+//		}
 		
-		//Qna qna= qnaRepository.findOne(id);
-		model.addAttribute("qna",qnaRepository.findOne(id));
+//		User loginUser = HttpSessionUtils.getUserFromSession(session);
+		Qna qna= qnaRepository.findOne(id);
+//		if( !qna.isSameWriter(loginUser)) {
+//
+//			return "/users/login";
+//		}
+		
+		model.addAttribute("qna",qna);
 		
 		return "/qnas/show";
 	}
@@ -69,9 +75,15 @@ public class QnaController {
 			return "redirect:/users/login";
 		}
 		
+		User loginUser = HttpSessionUtils.getUserFromSession(session);
+		Qna qna= qnaRepository.findOne(id);
+		if( !qna.isSameWriter(loginUser)) {
+
+			return "/users/login";
+		}
+		
 		//User user= userRepository.findOne(sessionedUser.getId());
-		//Qna qna= qnaRepository.findOne(id);
-		model.addAttribute("qna",qnaRepository.findOne(id));
+		model.addAttribute("qna",qna);
 		System.out.println("id: "+id);
 
 		return "/qnas/updateForm";
@@ -85,7 +97,12 @@ public class QnaController {
 		}
 
 		System.out.println("here 1 id : " + id);
+		User loginUser = HttpSessionUtils.getUserFromSession(session);
 		Qna qna= qnaRepository.findOne(id);
+		if( !qna.isSameWriter(loginUser)) {
+
+			return "/users/login";
+		}
 
 
 		System.out.println("here 2 title : " + title + " contents : " + contents );
@@ -109,7 +126,13 @@ public class QnaController {
 		if( !HttpSessionUtils.isLoginUser(session) ) {
 			return "redirect:/users/login";
 		}
-	
+		User loginUser = HttpSessionUtils.getUserFromSession(session);
+		Qna qna= qnaRepository.findOne(id);
+		if( !qna.isSameWriter(loginUser)) {
+
+			return "/users/login";
+		}
+		
 		try { // 이부분 엉성함.. sql exception 필요
 			qnaRepository.delete(id);
 		} catch (Exception  e) {

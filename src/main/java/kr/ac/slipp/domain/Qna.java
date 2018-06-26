@@ -89,4 +89,12 @@ public class Qna {
 		this.contents = contents;
 		
 	}
+
+	public boolean isSameWriter(User loginUser) {
+		
+		return this.writer.equals(loginUser);
+	}
+
+		
+	
 }
