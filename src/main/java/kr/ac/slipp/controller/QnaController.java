@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 import kr.ac.slipp.domain.Qna;
+import kr.ac.slipp.domain.Result;
 import kr.ac.slipp.domain.User;
 import kr.ac.slipp.dto.QnaRepository;
 import kr.ac.slipp.util.HttpSessionUtils;
@@ -63,22 +64,45 @@ public class QnaController {
 	public String updateform(@PathVariable Long id, Model model , HttpSession session) {
 		// 로그인 되었다는 것을 꼭 이런식으로 처리해야 하나?
 		//Object tempUser = session.getAttribute(HttpSessionUtils.USER_SESSION_KEY);
-		
-		try {
-			Qna qna= qnaRepository.findOne(id);
+
+		Qna qna= qnaRepository.findOne(id);
+		Result result = checkValid(session,qna);
+		if( !result.getValid() ) {
 			
-			hasPermission(session,qna);
-			
-			model.addAttribute("qna",qna);
-			
-			return "/qnas/updateForm";
-		} catch ( IllegalStateException e ) {
-			
-			model.addAttribute("errorMessage",e.getMessage());
+			model.addAttribute("errorMessage",result.getErrorMessage());
 			
 			return "/users/login";
 		}
+		
+		model.addAttribute("qna",qna);
+		
+		return "/qnas/updateForm";
+//		try {
+//			hasPermission(session,qna);
+//
+//		} catch ( IllegalStateException e ) {
+//			model.addAttribute("errorMessage",e.getMessage());
+//			
+//			return "/users/login";
+//		}
 	
+	}
+	
+	private Result checkValid(HttpSession session, Qna qna) {
+		if( !HttpSessionUtils.isLoginUser(session) ) {
+					
+			
+			return Result.fail("로그인이 필요합니다.");
+		}
+
+		User loginUser = HttpSessionUtils.getUserFromSession(session);
+		
+		if( !qna.isSameWriter(loginUser)) {
+
+			System.out.println("hasP 자신글만..");
+			return Result.fail("자신의 글만 수정, 삭제가 가능합니다.");
+		}
+		return Result.ok();
 	}
 	
 	private boolean hasPermission(HttpSession session, Qna qna) {
@@ -106,23 +130,21 @@ public class QnaController {
 	public String update(@PathVariable Long id, String title, String contents , Model model, HttpSession session) {
 		//Object tempUser = session.getAttribute(HttpSessionUtils.USER_SESSION_KEY);
 		
-		try {
-			Qna qna= qnaRepository.findOne(id);
+		Qna qna= qnaRepository.findOne(id);
+		Result result = checkValid(session,qna);
+		
+		if( !result.getValid() ) {
 			
-			hasPermission(session,qna);
-			
-			qna.update(title, contents);
-			
-			qnaRepository.save(qna);
-			
-			return String.format("redirect:/qnas/%d", id); 
-			
-		} catch ( IllegalStateException e ) {
-			
-			model.addAttribute("errorMessage",e.getMessage());
+			model.addAttribute("errorMessage",result.getErrorMessage());
 			
 			return "/users/login";
 		}
+		
+		qna.update(title, contents);
+		
+		qnaRepository.save(qna);
+		
+		return String.format("redirect:/qnas/%d", id); 
 		
 
 //		try { // 이부분 엉성함.. sql exception 필요
@@ -137,20 +159,22 @@ public class QnaController {
 	public String delete(@PathVariable Long id, Model model, HttpSession session) {
 		//Object tempUser = session.getAttribute(HttpSessionUtils.USER_SESSION_KEY);
 		
-		try {
-			Qna qna= qnaRepository.findOne(id);
+		Qna qna= qnaRepository.findOne(id);
+		Result result = checkValid(session,qna);
+		
+		if( !result.getValid() ) {
 			
-			hasPermission(session,qna);
-			
-			qnaRepository.delete(id);
-			
-			return "redirect:/";
-		} catch ( IllegalStateException e ) {
-			
-			model.addAttribute("errorMessage",e.getMessage());
+			model.addAttribute("errorMessage",result.getErrorMessage());
 			
 			return "/users/login";
 		}
+		
+		
+		qnaRepository.delete(id);
+		
+		return "redirect:/";
+		
+		
 		
 
 //		try { // 이부분 엉성함.. sql exception 필요
