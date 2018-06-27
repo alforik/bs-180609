@@ -50,17 +50,9 @@ public class QnaController {
 	}
 	@GetMapping("/{id}")
 	public String show(@PathVariable Long id, HttpSession session, Model model) {
-//		if( !HttpSessionUtils.isLoginUser(session) ) {
-//			
-//			return "/users/login";
-//		}
-		
-//		User loginUser = HttpSessionUtils.getUserFromSession(session);
+
 		Qna qna= qnaRepository.findOne(id);
-//		if( !qna.isSameWriter(loginUser)) {
-//
-//			return "/users/login";
-//		}
+
 		
 		model.addAttribute("qna",qna);
 		
@@ -71,76 +63,102 @@ public class QnaController {
 	public String updateform(@PathVariable Long id, Model model , HttpSession session) {
 		// 로그인 되었다는 것을 꼭 이런식으로 처리해야 하나?
 		//Object tempUser = session.getAttribute(HttpSessionUtils.USER_SESSION_KEY);
-		if( !HttpSessionUtils.isLoginUser(session) ) {
-			return "redirect:/users/login";
-		}
 		
-		User loginUser = HttpSessionUtils.getUserFromSession(session);
-		Qna qna= qnaRepository.findOne(id);
-		if( !qna.isSameWriter(loginUser)) {
-
+		try {
+			Qna qna= qnaRepository.findOne(id);
+			
+			hasPermission(session,qna);
+			
+			model.addAttribute("qna",qna);
+			
+			return "/qnas/updateForm";
+		} catch ( IllegalStateException e ) {
+			
+			model.addAttribute("errorMessage",e.getMessage());
+			
 			return "/users/login";
 		}
-		
-		//User user= userRepository.findOne(sessionedUser.getId());
-		model.addAttribute("qna",qna);
-		System.out.println("id: "+id);
+	
+	}
+	
+	private boolean hasPermission(HttpSession session, Qna qna) {
+		if( !HttpSessionUtils.isLoginUser(session) ) {
+			
+			System.out.println("hasP 로그인필요");
+			
+			
+			throw new IllegalStateException("로그인이 필요합니다.");
+		}
 
-		return "/qnas/updateForm";
+		User loginUser = HttpSessionUtils.getUserFromSession(session);
+		
+		if( !qna.isSameWriter(loginUser)) {
+			
+
+			System.out.println("hasP 자신글만..");
+
+			throw new IllegalStateException("자신의 글만 수정, 삭제가 가능합니다.");
+		}
+		return true;
 	}
 	// put method를 사용함
 	@PutMapping("/{id}")
-	public String update(@PathVariable Long id, String title, String contents , HttpSession session) {
+	public String update(@PathVariable Long id, String title, String contents , Model model, HttpSession session) {
 		//Object tempUser = session.getAttribute(HttpSessionUtils.USER_SESSION_KEY);
-		if( !HttpSessionUtils.isLoginUser(session) ) {
-			return "redirect:/users/login";
-		}
-
-		System.out.println("here 1 id : " + id);
-		User loginUser = HttpSessionUtils.getUserFromSession(session);
-		Qna qna= qnaRepository.findOne(id);
-		if( !qna.isSameWriter(loginUser)) {
-
+		
+		try {
+			Qna qna= qnaRepository.findOne(id);
+			
+			hasPermission(session,qna);
+			
+			qna.update(title, contents);
+			
+			qnaRepository.save(qna);
+			
+			return String.format("redirect:/qnas/%d", id); 
+			
+		} catch ( IllegalStateException e ) {
+			
+			model.addAttribute("errorMessage",e.getMessage());
+			
 			return "/users/login";
 		}
-
-
-		System.out.println("here 2 title : " + title + " contents : " + contents );
-		qna.update(title, contents);
-		
-		try { // 이부분 엉성함.. sql exception 필요
-			qnaRepository.save(qna);
-		} catch (Exception  e) {
-			throw new IllegalStateException("something wrong");
-		}
 		
 
-		//System.out.println("here 6");
-		//return "redirect:/qnas/"+id; // 이방법보다
-		return String.format("redirect:/qnas/%d", id); // 이방법이 좋음
+//		try { // 이부분 엉성함.. sql exception 필요
+//			qnaRepository.save(qna);
+//		} catch (Exception  e) {
+//			throw new IllegalStateException("something wrong");
+//		}
+		
 	}
 	
 	@DeleteMapping("/{id}")
-	public String delete(@PathVariable Long id, HttpSession session) {
+	public String delete(@PathVariable Long id, Model model, HttpSession session) {
 		//Object tempUser = session.getAttribute(HttpSessionUtils.USER_SESSION_KEY);
-		if( !HttpSessionUtils.isLoginUser(session) ) {
-			return "redirect:/users/login";
-		}
-		User loginUser = HttpSessionUtils.getUserFromSession(session);
-		Qna qna= qnaRepository.findOne(id);
-		if( !qna.isSameWriter(loginUser)) {
-
+		
+		try {
+			Qna qna= qnaRepository.findOne(id);
+			
+			hasPermission(session,qna);
+			
+			qnaRepository.delete(id);
+			
+			return "redirect:/";
+		} catch ( IllegalStateException e ) {
+			
+			model.addAttribute("errorMessage",e.getMessage());
+			
 			return "/users/login";
 		}
 		
-		try { // 이부분 엉성함.. sql exception 필요
-			qnaRepository.delete(id);
-		} catch (Exception  e) {
-			throw new IllegalStateException("something wrong");
-		}
-		//System.out.println("here 6");
-		//return "redirect:/qnas/"+id; // 이방법보다
-		return "redirect:/"; // 이방법이 좋음
+
+//		try { // 이부분 엉성함.. sql exception 필요
+//			qnaRepository.delete(id);
+//		} catch (Exception  e) {
+//			throw new IllegalStateException("something wrong");
+//		}
+
 	}
 
 
