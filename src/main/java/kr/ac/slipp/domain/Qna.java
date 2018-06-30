@@ -14,26 +14,32 @@ import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.OrderBy;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 @Entity
 public class Qna {
 	@Id
 	@GeneratedValue
+	@JsonProperty
 	private Long id;
 	
 	@ManyToOne  // 와우   질문-유저 관계
 	@JoinColumn(foreignKey = @ForeignKey(name="fk_question_writer") )
+	@JsonProperty
 	private User writer;
 	
 	//private String writer;
+	@JsonProperty
 	private String title;
 	
 	@Lob
+	@JsonProperty
 	private String contents;
 	
 	private LocalDateTime createDate;
 	
 	@OneToMany(mappedBy="qna")
-	@OrderBy("id ASC")
+	@OrderBy("id DESC")
 	private List<Answer> answers;
 	
 	public Qna() {};
