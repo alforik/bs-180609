@@ -17,7 +17,7 @@ import kr.ac.slipp.util.HttpSessionUtils;
 
 @Controller
 @RequestMapping("/qnas/{qnaId}/answers")
-public class AnswerController {
+public class AnswerController_bak {
 
 	@Autowired
 	private QnaRepository qnaRepository;
