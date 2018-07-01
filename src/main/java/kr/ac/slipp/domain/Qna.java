@@ -36,6 +36,9 @@ public class Qna {
 	@JsonProperty
 	private String contents;
 	
+	@JsonProperty
+	private Integer countOfAnswer = 0; //default
+	
 	private LocalDateTime createDate;
 	
 	@OneToMany(mappedBy="qna")
@@ -101,6 +104,16 @@ public class Qna {
 		return this.writer.equals(loginUser);
 	}
 
+	public void addCountOfAnswer() {
 		
+		this.countOfAnswer += 1;
+		
+	}	
+	
+	public void subtractCountOfAnswer() {
+		
+		this.countOfAnswer -= 1;
+		
+	}	
 	
 }
