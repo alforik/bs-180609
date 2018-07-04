@@ -30,7 +30,11 @@ public class User {
 	private String email;
 	
 	public User() {
-		
+//		this.id = 0L;
+//		this.userId = null;
+//		this.password = null;
+//		this.name = null;
+//		this.email = null;
 	}
 	
 	public User(String userId, String password, String name, String email) {
